@@ -125,6 +125,8 @@ void doCommand(String str, bool echo = false) {
 		mode = ACRO;
 	} else if (command == "auto") {
 		mode = AUTO;
+	} else if (command == "prc") {
+		printRCCalibration();
 	} else if (command == "rc") {
 		print("channels: ");
 		for (int i = 0; i < 16; i++) {

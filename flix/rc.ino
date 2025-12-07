@@ -5,6 +5,7 @@
 
 #include <SBUS.h>
 #include "util.h"
+#include "espnow_rx.h"
 
 SBUS rc(Serial2); // NOTE: Use RC(Serial2, 16, 17) if you use the old UART2 pins
 
@@ -16,12 +17,52 @@ float channelMax[16]; // calibration max values
 // Channels mapping (using float to store in parameters):
 float rollChannel = NAN, pitchChannel = NAN, throttleChannel = NAN, yawChannel = NAN, modeChannel = NAN;
 
+#define ESPNOW_RX_CHANNEL_MIN 988     // 通道默认最低值，执行校准后会使用校准值
+#define ESPNOW_RX_CHANNEL_ZERO 1500    // 通道默认中位点，执行校准后会使用校准值
+#define ESPNOW_RX_CHANNEL_MAX 2012     // 通道默认最高值，执行校准后会使用校准值
+
 void setupRC() {
 	print("Setup RC\n");
 	rc.begin();
+
+#if ESPNOW_RX_ENABLED
+	EspNow_Init();
+
+	//设置默认通道对应关系，执行校准后会使用校准值
+	if (isnan(rollChannel)) {rollChannel=0;}
+	if (isnan(pitchChannel)) {pitchChannel=1;}
+	if (isnan(throttleChannel)) {throttleChannel=2;}
+	if (isnan(yawChannel)) {yawChannel=3;}
+	if (isnan(modeChannel)) {modeChannel=4;}
+
+	//设置通道默认最小最大值，一般是1000~2000
+	for (int i = 0; i < 16; i++) {
+		if (channelZero[i]==0){
+			channelZero[i]=ESPNOW_RX_CHANNEL_ZERO;
+		}
+
+		if (channelMax[i]==0){
+			channelMax[i]=ESPNOW_RX_CHANNEL_MAX;
+		}
+	}
+	channelZero[int(throttleChannel)] = ESPNOW_RX_CHANNEL_MIN;
+#endif
 }
 
 bool readRC() {
+#if ESPNOW_RX_ENABLED
+	if (EspNow_HasNewPacket()) {
+    uint16_t* chs = EspNow_GetChannels();
+		for (int i = 0; i < ESPNOW_RC_MAX_CHANNELS; i++) channels[i] = chs[i]; // copy channels data
+		normalizeRC();
+		controlTime = t;
+		EspNow_ClearNewPacket();
+		return true;
+  }
+
+  return false;
+#endif
+
 	if (rc.read()) {
 		SBUSData data = rc.data();
 		for (int i = 0; i < 16; i++) channels[i] = data.ch[i]; // copy channels data

@@ -7,7 +7,8 @@
 #include "quaternion.h"
 #include "util.h"
 
-#define WIFI_ENABLED 1
+#define WIFI_ENABLED 0
+#define ESPNOW_RX_ENABLED 1 //使用了long_range协议和wifi_enable有冲突，当启用ESPNOW_ENABLED时，需要关闭WIFI_ENABLED
 
 float t = NAN; // current step time, s
 float dt; // time delta from previous step, s

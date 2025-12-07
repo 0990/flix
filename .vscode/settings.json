@@ -4,7 +4,10 @@
 	"files.associations": {
 		"*.sdf": "xml",
 		"*.ino": "cpp",
-		"*.h": "cpp"
+		"*.h": "cpp",
+		"vector": "cpp",
+		"xstring": "cpp",
+		"xutility": "cpp"
 	},
 	"C_Cpp.vcFormat.newLine.beforeOpenBrace.function": "newLine",
 	"C_Cpp.vcFormat.newLine.beforeOpenBrace.block": "sameLine",

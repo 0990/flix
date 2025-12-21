@@ -6,6 +6,7 @@
 #include <SBUS.h>
 #include "util.h"
 #include "espnow_rx.h"
+#include "tx_rx_config.h"
 
 SBUS rc(Serial2); // NOTE: Use RC(Serial2, 16, 17) if you use the old UART2 pins
 
@@ -51,9 +52,11 @@ void setupRC() {
 
 bool readRC() {
 #if ESPNOW_RX_ENABLED
+	uint32_t now = millis();
+	EspNow_LinkStatisticsTick(now);
 	if (EspNow_HasNewPacket()) {
     uint16_t* chs = EspNow_GetChannels();
-		for (int i = 0; i < ESPNOW_RC_MAX_CHANNELS; i++) channels[i] = chs[i]; // copy channels data
+		for (int i = 0; i < RC_MAX_CHANNELS; i++) channels[i] = chs[i]; // copy channels data
 		normalizeRC();
 		controlTime = t;
 		EspNow_ClearNewPacket();
